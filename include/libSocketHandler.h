@@ -2,7 +2,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <signal.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <netdb.h>
@@ -11,13 +10,17 @@
 #include <errno.h>
 #include <sys/ioctl.h>
 #include <net/if.h>
-#include "contreaul.h"
+
+#ifndef CONTREAUL_H 
+    #include "contreaul.h"
+    #define CONTREAUL_H 1
+#endif
 
 #define IOT_PORT 5000
 #define IOT_URL "mariusc.best"
 #define INTERFACE "wlp1s0" //to be changed for the raspberry
 #define ID_FRAME_LEN 7
-int resolveIp ();
+int DNSResolution();
 int initSocket();
 int getMacAddr(char *macAddr);
 int sendToSocket(char *msg, int len);

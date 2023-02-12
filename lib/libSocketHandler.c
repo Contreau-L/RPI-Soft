@@ -1,5 +1,7 @@
-#include "../include/libSocketHandler.h"
-
+#ifndef LIBSOCKETHANDLER_H
+    #include "../include/libSocketHandler.h"
+    #define LIBSOCKETHANDLER_H 1
+#endif
 int socketFd;
 struct sockaddr_in server;
 
@@ -11,7 +13,7 @@ int initSocket () {
         return -1;
     }
     server.sin_family = AF_INET;
-    if(resolveIp() < 0) {
+    if(DNSResolution() < 0) {
         perror("Error resolving host");
         return -1;
     }
@@ -25,7 +27,7 @@ int initSocket () {
 }
 
 
-int resolveIp () {
+int DNSResolution () {
     struct hostent *host;
     host = gethostbyname(IOT_URL);
     if (host == NULL) {
