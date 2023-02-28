@@ -21,6 +21,10 @@
     #include "../include/libActuatorManager.h"
     #define LIBACTUATORMANAGER_H 1
 #endif
+#ifndef LIBSHAREDMEMORY_H
+    #include "../include/libSharedMemory.h"
+    #define LIBSHAREDMEMORY_H 1
+#endif
 
 int pidSensorManager = 0;
 int pidActuatorManager = 0;
@@ -28,6 +32,8 @@ pthread_t network;
 sem_t *semNetwork;
 int main() {
     printf("main of contreaul, let's create all processes\n");
+    int idLogShm = createlogSharedMemory();
+    int idWaterShm = createLineToWaterSharedMemory();
     switch(createFork(&pidSensorManager, &pidActuatorManager)){
         case STATE_MACHINE:
             printf("I'm the state machine\n");
