@@ -5,7 +5,11 @@
 
 
 int NB_HUMIDITY_SENSOR;
-
+int *humidityCalibration;
+float phCoeff = 0.0;
+float phOffset = 0.0;
+float pressureCoeff = 0.0;
+float pressureOffset = 0.0;
 void initSignalHandler(void (*handlerFunction)(int, siginfo_t*),int count, ...) {
     struct sigaction action;
     action.sa_sigaction = (void *)handlerFunction;
@@ -19,7 +23,6 @@ void initSignalHandler(void (*handlerFunction)(int, siginfo_t*),int count, ...) 
     int currentSignal;
     for (int i = 0; i < count; i++) {
         int currentSignal = va_arg(signalList, int);
-        printf("signal %d\n",currentSignal);
         sigaction(currentSignal, &action, NULL);
     }
     va_end(signalList);
@@ -72,7 +75,6 @@ void readLogFile(uint8_t **tabToFill,int *len){
         *tabToFill = realloc(*tabToFill, (*len+14+NB_HUMIDITY_SENSOR)*sizeof(uint8_t));
         (*tabToFill)[(*len)++] = 0x00; //type of frame
         fscanf(file,"%hhu,",&((*tabToFill)[(*len)++]));
-        printf("len %d\n",*len);
         for(int i = *len; i < NB_HUMIDITY_SENSOR+*len ; i++){
             fscanf(file,"%hhu,",&((*tabToFill)[i]));
             printf("%d " , (*tabToFill)[i]);
@@ -91,12 +93,6 @@ void readLogFile(uint8_t **tabToFill,int *len){
         _put2Bytes(tabToFill,len,read2Bytes);
         fscanf(file,"%hhu:%hhu",&((*tabToFill)[(*len)++]),&((*tabToFill)[(*len)++])); // hour and minute
         fscanf(file,"\n");
-        for(int i = 0 ; i < *len ; i++){
-            printf("%d ",(*tabToFill)[i]);
-            if(i % 15 == 0)
-                printf("\n");
-        }
-        printf("len = %d\n",*len);
 
     }while(!feof(file));
     fclose(file);
@@ -110,12 +106,27 @@ void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value){
 
 
 void readContreaulConf () {
+    char equation[30];
     FILE *file = fopen(CONF_FILE, "r");
     if(file == NULL){
         printf("Error opening file!\n");
         exit(1);
     }
-    fscanf(file,"%d",&NB_HUMIDITY_SENSOR);
+    fscanf(file,"%d/",&NB_HUMIDITY_SENSOR);
     printf("NB_HUMIDITY_SENSOR = %d\n",NB_HUMIDITY_SENSOR);
+    humidityCalibration = malloc(NB_HUMIDITY_SENSOR*sizeof(int));
+    for(int i = 0 ; i < NB_HUMIDITY_SENSOR ; i++){
+        fscanf(file,"%d/",&(humidityCalibration[i]));
+    }
+    fscanf(file,"%f,%f/",&(phCoeff),&(phOffset));
+    fscanf(file,"%f,%f/",&(pressureCoeff),&(pressureOffset));
+
+    for(int i = 0 ; i < NB_HUMIDITY_SENSOR ; i++){
+        printf("humidityCalibration[%d] = %d\n",i,humidityCalibration[i]);
+    }
+    printf("phCoeff = %f\n",phCoeff);
+    printf("phOffset = %f\n",phOffset);
+    printf("pressureCoeff = %f\n",pressureCoeff);
+    printf("pressureOffset = %f\n",pressureOffset);
     fclose(file);
 }
