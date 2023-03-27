@@ -4,7 +4,7 @@ SRC_DIR=src
 LIB_DIR=lib
 BIN_DIR=bin
 
-all : directory libSocketHandler libUtils libSensorManager libActuatorManager libSharedMemory contreaul
+all : directory libSocketHandler libUtils libSensorManager libActuatorManager libSharedMemory sensorManager.o actuatorManager.o stateMachine.o contreaul
 libSocketHandler.o : $(LIB_DIR)/libSocketHandler.c
 	gcc -c $(LIB_DIR)/libSocketHandler.c -o $(OBJ_DIR)/libSocketHandler.o
 libSocketHandler : libSocketHandler.o
@@ -25,10 +25,16 @@ libSharedMemory.o : $(LIB_DIR)/libSharedMemory.c
 	gcc -c $(LIB_DIR)/libSharedMemory.c -o $(OBJ_DIR)/libSharedMemory.o
 libSharedMemory : libSharedMemory.o
 	ar rcs $(BIN_DIR)/libSharedMemory.a $(OBJ_DIR)/libSharedMemory.o
+sensorManager.o : $(SRC_DIR)/sensorManager.c
+	gcc -c $(SRC_DIR)/sensorManager.c -o $(OBJ_DIR)/sensorManager.o
+actuatorManager.o : $(SRC_DIR)/actuatorManager.c
+	gcc -c $(SRC_DIR)/actuatorManager.c -o $(OBJ_DIR)/actuatorManager.o
+stateMachine.o : $(SRC_DIR)/stateMachine.c
+	gcc -c $(SRC_DIR)/stateMachine.c -o $(OBJ_DIR)/stateMachine.o
 contreaul.o : $(SRC_DIR)/contreaul.c
 	gcc -c $(SRC_DIR)/contreaul.c -o $(OBJ_DIR)/contreaul.o
 contreaul : contreaul.o
-	gcc $(OBJ_DIR)/contreaul.o -o $(BIN_DIR)/contreaul -L$(BIN_DIR) -lUtils -lSocketHandler  -lSensorManager -lActuatorManager -lSharedMemory -lpthread
+	gcc $(OBJ_DIR)/contreaul.o $(OBJ_DIR)/stateMachine.o $(OBJ_DIR)/sensorManager.o $(OBJ_DIR)/actuatorManager.o -o $(BIN_DIR)/contreaul -L$(BIN_DIR) -lUtils -lSharedMemory -lSocketHandler -lpthread
 directory :
 	mkdir -p $(OBJ_DIR) $(BIN_DIR)
 clean :

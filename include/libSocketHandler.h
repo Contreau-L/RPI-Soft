@@ -17,12 +17,14 @@
 #endif
 
 #define IOT_PORT 5000
-#define IOT_URL "mariusc.best"
-#define INTERFACE "wlp1s0" //to be changed for the raspberry
+#define IOT_URL "localhost"
+#define INTERFACE "wlp0s20f3" //to be changed for the raspberry
 #define ID_FRAME_LEN 7
+#define ACK 0xb5
 int DNSResolution();
 int initSocket();
 int getMacAddr(char *macAddr);
 int sendToSocket(char *msg, int len);
 int socketManager();
 int sendIndentificationFrame();
+void closeSocket();
