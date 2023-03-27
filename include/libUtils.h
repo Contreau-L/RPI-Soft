@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdint.h>
+#include <string.h>
 #ifndef CONTREAUL_H
     #include "contreaul.h"
     #define CONTREAUL_H 1
