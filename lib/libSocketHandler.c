@@ -4,7 +4,7 @@
 #endif
 int socketFd;
 struct sockaddr_in server;
-
+extern int NB_HUMIDITY_SENSOR;
 
 int initSocket () {
     socketFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -90,4 +90,8 @@ int getMacAddr (char *macAddr) {
 
 int sendToSocket (char *msg, int len) {
     return write(socketFd, msg, len);
+}
+
+void closeSocket () {
+    close(socketFd);
 }

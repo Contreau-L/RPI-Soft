@@ -3,7 +3,6 @@
     #define LIBSHAREDMEMORY_H 1
 #endif
 
-
 int createlogSharedMemory(){
     key_t key = ftok("makefile",454545);
     int sharedMemoryId;

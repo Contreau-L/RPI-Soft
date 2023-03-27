@@ -1,12 +1,13 @@
 
 
-#define NB_HUMIDITY_SENSOR 2 //will be dynamicly found later
+
+
 #define SENSOR_MANAGER 1
 #define ACTUATOR_MANAGER 2
 #define STATE_MACHINE 3
 
-void *networkThread(void *arg);
-
+#define LOG_FILE "contreaul.log"
+#define CONF_FILE "contreaul.conf"
 typedef struct {
     int nbLines;
     unsigned char value[255]; //this is static because with shared memory we can't use malloc
