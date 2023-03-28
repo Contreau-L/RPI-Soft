@@ -36,7 +36,7 @@ int main() {
     idLogShm = createlogSharedMemory();
     idWaterShm = createLineToWaterSharedMemory();
     
-    switch(createFork(&pidSensorManager, &pidActuatorManager)){
+    switch(createForks(&pidSensorManager, &pidActuatorManager)){
         case STATE_MACHINE:
             printf("I'm the state machine %d\n",getpid());
             initStateMachine();

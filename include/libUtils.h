@@ -1,19 +1,11 @@
-#include <semaphore.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <signal.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdint.h>
-#include <string.h>
+
 #ifndef CONTREAUL_H
     #include "contreaul.h"
     #define CONTREAUL_H 1
 #endif
 
-int createFork(int *pidSensorManager, int *pidActuatorManager);
+
+int createForks(int *pidSensorManager, int *pidActuatorManager);
 void initSignalHandler(void (*handlerFunction)(int, siginfo_t*),int count, ...);
 void initSensorSem(sem_t **sensorSem);
 void initActuatorSem(sem_t **actuatorSem);

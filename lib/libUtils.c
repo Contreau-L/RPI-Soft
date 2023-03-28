@@ -5,11 +5,9 @@
 
 
 int NB_HUMIDITY_SENSOR;
-int *humidityCalibration;
-float phCoeff = 0.0;
-float phOffset = 0.0;
-float pressureCoeff = 0.0;
-float pressureOffset = 0.0;
+sensorCalibration sensorCalib;
+sensorsPinConfiguration sensorsPinConfig;
+actuatorsPinConfiguration actuatorsPinConfig;
 void initSignalHandler(void (*handlerFunction)(int, siginfo_t*),int count, ...) {
     struct sigaction action;
     action.sa_sigaction = (void *)handlerFunction;
@@ -28,7 +26,7 @@ void initSignalHandler(void (*handlerFunction)(int, siginfo_t*),int count, ...) 
     va_end(signalList);
 }
 
-int createFork(int *pidSensorManager, int *pidActuatorManager){
+int createForks(int *pidSensorManager, int *pidActuatorManager){
     *pidSensorManager = fork();
     if(*pidSensorManager == 0) {
         return SENSOR_MANAGER;
@@ -77,10 +75,7 @@ void readLogFile(uint8_t **tabToFill,int *len){
         fscanf(file,"%hhu,",&((*tabToFill)[(*len)++]));
         for(int i = *len; i < NB_HUMIDITY_SENSOR+*len ; i++){
             fscanf(file,"%hhu,",&((*tabToFill)[i]));
-            printf("%d " , (*tabToFill)[i]);
-
         }
-        printf("\n");
         *len += NB_HUMIDITY_SENSOR;
         for(int i = 0 ; i < 2 ; i++){ //temperature and water level
             fscanf(file,"%hu,",&read2Bytes);
@@ -106,26 +101,106 @@ void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value){
 
 
 void readContreaulConf () {
-    FILE *file = fopen(CONF_FILE, "r");
-    if(file == NULL){
-        printf("Error opening file!\n");
-        exit(1);
-    }
-    fscanf(file,"%d/",&NB_HUMIDITY_SENSOR);
-    printf("NB_HUMIDITY_SENSOR = %d\n",NB_HUMIDITY_SENSOR);
-    humidityCalibration = malloc(NB_HUMIDITY_SENSOR*sizeof(int));
-    for(int i = 0 ; i < NB_HUMIDITY_SENSOR ; i++){
-        fscanf(file,"%d/",&(humidityCalibration[i]));
-    }
-    fscanf(file,"%f,%f/",&(phCoeff),&(phOffset));
-    fscanf(file,"%f,%f/",&(pressureCoeff),&(pressureOffset));
+    FILE *fp;
+    char buffer[2000];
+    cJSON *json;
+    cJSON *sensors;
+    cJSON *actuators;
 
-    for(int i = 0 ; i < NB_HUMIDITY_SENSOR ; i++){
-        printf("humidityCalibration[%d] = %d\n",i,humidityCalibration[i]);
+    cJSON *I2Cpin;
+    cJSON *I2Caddress;
+    cJSON *coeff;
+    cJSON *offset;
+    cJSON *pin;
+
+    cJSON *humiditySensor;
+    cJSON *waterValve;
+    int i = 0;
+
+    fp = fopen(CONF_FILE, "r");
+    if (fp == NULL) {
+        perror("Error opening file");
+        return;
     }
-    printf("phCoeff = %f\n",phCoeff);
-    printf("phOffset = %f\n",phOffset);
-    printf("pressureCoeff = %f\n",pressureCoeff);
-    printf("pressureOffset = %f\n",pressureOffset);
-    fclose(file);
+    fread(buffer, sizeof(char), sizeof(buffer) - 1, fp);
+    fclose(fp);
+
+    json = cJSON_Parse(buffer);
+    if (json == NULL) {
+        const char *error_ptr = cJSON_GetErrorPtr();
+        if (error_ptr != NULL) {
+            fprintf(stderr, "Error before: %s\n", error_ptr);
+        }
+        return;
+    }
+    cJSON *nb_humidity_sensor = cJSON_GetObjectItemCaseSensitive(json, "NB_HUMIDITY_SENSOR");
+    if (cJSON_IsNumber(nb_humidity_sensor)) {
+        NB_HUMIDITY_SENSOR = nb_humidity_sensor->valueint;
+    }
+
+    sensors = cJSON_GetObjectItemCaseSensitive(json, "sensors");
+
+
+    cJSON *humiditySensors = cJSON_GetObjectItemCaseSensitive(sensors, "humiditySensors");
+    cJSON_ArrayForEach(humiditySensor, humiditySensors) {
+        I2Cpin = cJSON_GetObjectItemCaseSensitive(humiditySensor, "I2Cpin");
+        sensorsPinConfig.humidityPins[i].I2CPin = I2Cpin->valueint;
+        I2Caddress = cJSON_GetObjectItemCaseSensitive(humiditySensor, "I2Caddress");
+        sscanf(I2Caddress->valuestring,"%x",&(sensorsPinConfig.humidityPins[i].I2CAddress));
+        cJSON *MAX = cJSON_GetObjectItemCaseSensitive(humiditySensor, "MAX");
+        sensorCalib.humidityCalibration[i] = MAX->valueint;
+        i++;  
+    }
+
+
+    cJSON *phMeter = cJSON_GetObjectItemCaseSensitive(sensors, "phMeter");
+    I2Cpin = cJSON_GetObjectItemCaseSensitive(phMeter, "I2Cpin");
+    sensorsPinConfig.phPin.I2CPin = I2Cpin->valueint;
+    I2Caddress = cJSON_GetObjectItemCaseSensitive(phMeter, "I2Caddress");
+    sscanf(I2Caddress->valuestring,"%x",&(sensorsPinConfig.phPin.I2CAddress));
+    coeff = cJSON_GetObjectItemCaseSensitive(phMeter, "coeff");
+    sensorCalib.phCoeff = coeff->valuedouble;
+    offset = cJSON_GetObjectItemCaseSensitive(phMeter, "offset");
+    sensorCalib.phOffset = offset->valuedouble;
+
+
+    cJSON *pressureSensor = cJSON_GetObjectItemCaseSensitive(sensors, "pressureSensor");
+    I2Cpin = cJSON_GetObjectItemCaseSensitive(pressureSensor, "I2Cpin");
+    sensorsPinConfig.pressurePin.I2CPin = I2Cpin->valueint;
+    I2Caddress = cJSON_GetObjectItemCaseSensitive(pressureSensor, "I2Caddress");
+    sscanf(I2Caddress->valuestring,"%x",&(sensorsPinConfig.pressurePin.I2CAddress));
+    coeff = cJSON_GetObjectItemCaseSensitive(pressureSensor, "coeff");
+    sensorCalib.pressureCoeff = coeff->valuedouble;
+    offset = cJSON_GetObjectItemCaseSensitive(pressureSensor, "offset");
+    sensorCalib.pressureOffset = offset->valuedouble;
+
+    //actuators now
+    actuators = cJSON_GetObjectItemCaseSensitive(json, "actuators");
+
+    cJSON *pump = cJSON_GetObjectItemCaseSensitive(actuators, "pump");
+    pin = cJSON_GetObjectItemCaseSensitive(pump, "pin");
+    actuatorsPinConfig.pumpPin = I2Cpin->valueint;
+
+    //for each for water valves
+    cJSON *waterValves = cJSON_GetObjectItemCaseSensitive(actuators, "waterValves");
+    i = 0;
+    cJSON_ArrayForEach(waterValve, waterValves) {
+        pin = cJSON_GetObjectItemCaseSensitive(waterValve, "pin");
+        actuatorsPinConfig.waterValvePins[i] = pin->valueint;
+        i++;
+    }
+    //print everything
+    printf("NB_HUMIDITY_SENSOR: %d\n",NB_HUMIDITY_SENSOR);
+    for(int i = 0 ; i < NB_HUMIDITY_SENSOR ; i++){
+        printf("humiditySensor %d: I2Cpin: %d, I2Caddress: %02x, MAX: %d\n",i,sensorsPinConfig.humidityPins[i].I2CPin,sensorsPinConfig.humidityPins[i].I2CAddress,sensorCalib.humidityCalibration[i]);
+    }
+
+    printf("phMeter: I2Cpin: %d, I2Caddress: %02x, coeff: %f, offset: %f\n",sensorsPinConfig.phPin.I2CPin,sensorsPinConfig.phPin.I2CAddress,sensorCalib.phCoeff,sensorCalib.phOffset);
+
+    printf("pressureSensor: I2Cpin: %d, I2Caddress: %02x, coeff: %f, offset: %f\n",sensorsPinConfig.pressurePin.I2CPin,sensorsPinConfig.pressurePin.I2CAddress,sensorCalib.pressureCoeff,sensorCalib.pressureOffset);
+
+    for(int i = 0; i < NB_HUMIDITY_SENSOR ; i++){
+        printf("waterValve %d: pin: %d\n",i,actuatorsPinConfig.waterValvePins[i]);
+    }
+    printf("pump: pin: %d\n",actuatorsPinConfig.pumpPin);
 }
