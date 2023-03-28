@@ -34,7 +34,7 @@ stateMachine.o : $(SRC_DIR)/stateMachine.c
 contreaul.o : $(SRC_DIR)/contreaul.c
 	gcc -c $(SRC_DIR)/contreaul.c -o $(OBJ_DIR)/contreaul.o
 contreaul : contreaul.o
-	gcc $(OBJ_DIR)/contreaul.o $(OBJ_DIR)/stateMachine.o $(OBJ_DIR)/sensorManager.o $(OBJ_DIR)/actuatorManager.o -o $(BIN_DIR)/contreaul -L$(BIN_DIR) -lUtils -lSharedMemory -lSocketHandler -lpthread -Wl,-rpath,$(CURRENT_DIRECTORY)/$(BIN_DIR)
+	gcc $(OBJ_DIR)/contreaul.o $(OBJ_DIR)/stateMachine.o $(OBJ_DIR)/sensorManager.o $(OBJ_DIR)/actuatorManager.o -o $(BIN_DIR)/contreaul -L$(BIN_DIR) -lUtils -lSharedMemory -lSocketHandler -lpthread -lcjson -Wl,-rpath,$(CURRENT_DIRECTORY)/$(BIN_DIR)
 directory :
 	mkdir -p $(OBJ_DIR) $(BIN_DIR)
 clean :
