@@ -106,7 +106,6 @@ void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value){
 
 
 void readContreaulConf () {
-    char equation[30];
     FILE *file = fopen(CONF_FILE, "r");
     if(file == NULL){
         printf("Error opening file!\n");
