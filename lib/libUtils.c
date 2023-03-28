@@ -146,7 +146,7 @@ void readContreaulConf () {
         I2Cpin = cJSON_GetObjectItemCaseSensitive(humiditySensor, "I2Cpin");
         sensorsPinConfig.humidityPins[i].I2CPin = I2Cpin->valueint;
         I2Caddress = cJSON_GetObjectItemCaseSensitive(humiditySensor, "I2Caddress");
-        sscanf(I2Caddress->valuestring,"%x",&(sensorsPinConfig.humidityPins[i].I2CAddress));
+        sscanf(I2Caddress->valuestring,"%hhx",&(sensorsPinConfig.humidityPins[i].I2CAddress));
         cJSON *MAX = cJSON_GetObjectItemCaseSensitive(humiditySensor, "MAX");
         sensorCalib.humidityCalibration[i] = MAX->valueint;
         i++;  
@@ -157,7 +157,7 @@ void readContreaulConf () {
     I2Cpin = cJSON_GetObjectItemCaseSensitive(phMeter, "I2Cpin");
     sensorsPinConfig.phPin.I2CPin = I2Cpin->valueint;
     I2Caddress = cJSON_GetObjectItemCaseSensitive(phMeter, "I2Caddress");
-    sscanf(I2Caddress->valuestring,"%x",&(sensorsPinConfig.phPin.I2CAddress));
+    sscanf(I2Caddress->valuestring,"%hhx",&(sensorsPinConfig.phPin.I2CAddress));
     coeff = cJSON_GetObjectItemCaseSensitive(phMeter, "coeff");
     sensorCalib.phCoeff = coeff->valuedouble;
     offset = cJSON_GetObjectItemCaseSensitive(phMeter, "offset");
@@ -168,7 +168,7 @@ void readContreaulConf () {
     I2Cpin = cJSON_GetObjectItemCaseSensitive(pressureSensor, "I2Cpin");
     sensorsPinConfig.pressurePin.I2CPin = I2Cpin->valueint;
     I2Caddress = cJSON_GetObjectItemCaseSensitive(pressureSensor, "I2Caddress");
-    sscanf(I2Caddress->valuestring,"%x",&(sensorsPinConfig.pressurePin.I2CAddress));
+    sscanf(I2Caddress->valuestring,"%hhx",&(sensorsPinConfig.pressurePin.I2CAddress));
     coeff = cJSON_GetObjectItemCaseSensitive(pressureSensor, "coeff");
     sensorCalib.pressureCoeff = coeff->valuedouble;
     offset = cJSON_GetObjectItemCaseSensitive(pressureSensor, "offset");
@@ -192,12 +192,12 @@ void readContreaulConf () {
     //print everything
     printf("NB_HUMIDITY_SENSOR: %d\n",NB_HUMIDITY_SENSOR);
     for(int i = 0 ; i < NB_HUMIDITY_SENSOR ; i++){
-        printf("humiditySensor %d: I2Cpin: %d, I2Caddress: %02x, MAX: %d\n",i,sensorsPinConfig.humidityPins[i].I2CPin,sensorsPinConfig.humidityPins[i].I2CAddress,sensorCalib.humidityCalibration[i]);
+        printf("humiditySensor %d: I2Cpin: %d, I2Caddress: 0x%02x, MAX: %d\n",i,sensorsPinConfig.humidityPins[i].I2CPin,sensorsPinConfig.humidityPins[i].I2CAddress,sensorCalib.humidityCalibration[i]);
     }
 
-    printf("phMeter: I2Cpin: %d, I2Caddress: %02x, coeff: %f, offset: %f\n",sensorsPinConfig.phPin.I2CPin,sensorsPinConfig.phPin.I2CAddress,sensorCalib.phCoeff,sensorCalib.phOffset);
+    printf("phMeter: I2Cpin: %d, I2Caddress: 0x%02x, coeff: %f, offset: %f\n",sensorsPinConfig.phPin.I2CPin,sensorsPinConfig.phPin.I2CAddress,sensorCalib.phCoeff,sensorCalib.phOffset);
 
-    printf("pressureSensor: I2Cpin: %d, I2Caddress: %02x, coeff: %f, offset: %f\n",sensorsPinConfig.pressurePin.I2CPin,sensorsPinConfig.pressurePin.I2CAddress,sensorCalib.pressureCoeff,sensorCalib.pressureOffset);
+    printf("pressureSensor: I2Cpin: %d, I2Caddress: 0x%02x, coeff: %f, offset: %f\n",sensorsPinConfig.pressurePin.I2CPin,sensorsPinConfig.pressurePin.I2CAddress,sensorCalib.pressureCoeff,sensorCalib.pressureOffset);
 
     for(int i = 0; i < NB_HUMIDITY_SENSOR ; i++){
         printf("waterValve %d: pin: %d\n",i,actuatorsPinConfig.waterValvePins[i]);
