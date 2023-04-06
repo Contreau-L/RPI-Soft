@@ -24,22 +24,13 @@ typedef struct {
     uint8_t I2CPin;
 } I2CAnalogSensorPin;
 
-typedef struct {
-    int nbLines;
-    unsigned char value[255]; //this is static because with shared memory we can't use malloc
-} humiditySensors;
 
 typedef struct {
-    humiditySensors hSensors;
-    unsigned char waterLevel;
-    unsigned char phLevel;
-    unsigned char temperature;
+    uint8_t hSensorsValue[255];
+    uint16_t waterLevel;
+    uint8_t phLevel;
+    uint16_t temperature;
 } log;
-
-typedef struct {
-    int nbLines;
-    unsigned char line[255];
-} lineToWater;
 
 typedef struct {
     int humidityCalibration[255];

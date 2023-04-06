@@ -22,7 +22,7 @@ extern int pidSensorManager;
 extern int pidActuatorManager;
 extern int idWaterShm;
 extern int idLogShm;
-extern int NB_HUMIDITY_SENSOR;
+extern int NB_HUMIDITY_SENSORS;
 pthread_t network;
 sem_t networkSem;
 sem_t stateMachineSem;
@@ -78,9 +78,9 @@ void *networkManager(void *arg) {
         sem_wait(&networkSem);
         readLogFile(&dataToSend, &len);
         if(socketManager()){
-            for(int i = 0; i < len; i += 13+NB_HUMIDITY_SENSOR){
+            for(int i = 0; i < len; i += 13+NB_HUMIDITY_SENSORS){
                 usleep(100000);
-                if(sendToSocket(&dataToSend[i], 13+NB_HUMIDITY_SENSOR)){
+                if(sendToSocket(&dataToSend[i], 13+NB_HUMIDITY_SENSORS)){
                     printf("Data sent\n");
                 }
                 else{
