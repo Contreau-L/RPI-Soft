@@ -14,3 +14,4 @@ void readLogFile(uint8_t **tabToFill,int *len);
 void readContreaulConf();
 void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value);
 void registerThresholds(char *data);
+void readThresholds(uint8_t **thresholdsValues);

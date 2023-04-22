@@ -15,16 +15,16 @@
 log newLog;
 sem_t sensorSem;
 extern int idLogShm;
-
+int stateMachinePid;
 void initSensorManager () { 
-    initSignalHandler(sensorManagerSignalHandler,1,SIGALRM);
+    initSignalHandler(sensorManagerSignalHandler,1,SIGUSR1);
     sem_init(&sensorSem,0,0);
     sensorManager();
+    stateMachinePid = getppid();
 
 }
 void sensorManager () {
     while(1){
-        alarm(10);
         sem_wait(&sensorSem);
         newLog.phLevel = 10*readPhValue();
         printf("ph level : %d\n",newLog.phLevel);
@@ -33,12 +33,13 @@ void sensorManager () {
         newLog.temperature = 10*readTemperatureValue();
         readHumidityValues(newLog.hSensorsValue);
         writeLogShm(idLogShm,&newLog);
+        kill(stateMachinePid,SIGUSR1); //inform the stateMachine that we got a new measurement done
     }
 }
 
 void sensorManagerSignalHandler(int signal, siginfo_t *info){
     switch(signal){
-        case SIGALRM :
+        case SIGUSR1 :
             sem_post(&sensorSem);
             break;
         default :

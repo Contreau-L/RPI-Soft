@@ -16,6 +16,7 @@
 #define ACTUATOR_MANAGER 2
 #define STATE_MACHINE 3
 
+#define CST_DATA_LEN 13
 #define LOG_FILE "contreaul.log"
 #define CONF_FILE "contreaulConf.json"
 #define TH_FILE "contreaulThresholds.json"
