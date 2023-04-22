@@ -3,8 +3,9 @@
     #define LIBSHAREDMEMORY_H 1
 #endif
 
+extern int NB_HUMIDITY_SENSORS;
 int createlogSharedMemory(){
-    key_t key = ftok("makefile",454545);
+    key_t key = ftok("makefile",5555);
     int sharedMemoryId;
     sharedMemoryId = shmget(key, sizeof(log), IPC_CREAT | 0666);
     if(sharedMemoryId < 0){
@@ -14,9 +15,9 @@ int createlogSharedMemory(){
     return sharedMemoryId;
 }
 int createLineToWaterSharedMemory(){
-    key_t key = ftok("makefile",2222);
+    key_t key = ftok("makefile",3333);
     int sharedMemoryId;
-    sharedMemoryId = shmget(key, sizeof(lineToWater), IPC_CREAT | 0666);
+    sharedMemoryId = shmget(key, sizeof(uint8_t), IPC_CREAT | 0666);
     if(sharedMemoryId < 0){
         perror("Error in creating shared memory 2");
         return -1;
@@ -36,14 +37,14 @@ int writeLogShm(int sharedMemoryId, log *logToWrite){
     return 0;
 }
 
-int writeLineToWaterShm(int sharedMemoryId, lineToWater *lineToWaterToWrite){
-    lineToWater *sharedMemory = (lineToWater*)shmat(sharedMemoryId, NULL, 0);
+int writeLineToWaterShm(int sharedMemoryId, uint8_t *lineToWaterToWrite){
+    uint8_t *sharedMemory = (uint8_t*)shmat(sharedMemoryId, NULL, 0);
 
-    if(sharedMemory == (lineToWater*)-1){
+    if(sharedMemory == (uint8_t*)-1){
         perror("Error in attaching shared memory");
         return -1;
     }
-    _fillLineToWater(sharedMemory, lineToWaterToWrite);
+    memcpy(sharedMemory, lineToWaterToWrite, NB_HUMIDITY_SENSORS);
     shmdt(sharedMemory);
     return 0;
 }
@@ -60,14 +61,14 @@ int readLogShm(int sharedMemoryId, log *logToFill){
     return 0;
 }
 
-int readLineToWaterShm(int sharedMemoryId, lineToWater *lineToWaterToRead){
-    lineToWater *sharedMemory = (lineToWater*)shmat(sharedMemoryId, NULL, 0);
+int readLineToWaterShm(int sharedMemoryId, uint8_t *lineToWaterToRead){
+    uint8_t *sharedMemory = (uint8_t*)shmat(sharedMemoryId, NULL, 0);
 
-    if(sharedMemory == (lineToWater*)-1){
+    if(sharedMemory == (uint8_t*)-1){
         perror("Error in attaching shared memory");
         return -1;
     }
-    _fillLineToWater(lineToWaterToRead, sharedMemory);
+    memcpy(lineToWaterToRead, sharedMemory, NB_HUMIDITY_SENSORS);
     shmdt(sharedMemory);
     return 0;
 }
@@ -78,18 +79,10 @@ void eraseSharedMemory(int sharedMemoryId){
 
 
 void _fillLog(log *logToFill, log *logToRead){
-    logToFill->hSensors.nbLines = logToRead->hSensors.nbLines;
-    for(int i = 0; i < logToRead->hSensors.nbLines; i++){
-        logToFill->hSensors.value[i] = logToRead->hSensors.value[i];
+    for(int i = 0; i < NB_HUMIDITY_SENSORS; i++){
+        logToFill->hSensorsValue[i] = logToRead->hSensorsValue[i] ;
     }
     logToFill->waterLevel = logToRead->waterLevel;
     logToFill->phLevel = logToRead->phLevel;
     logToFill->temperature = logToRead->temperature;
-}
-
-void _fillLineToWater(lineToWater *lineToWaterToFill, lineToWater *toRead){
-    lineToWaterToFill->nbLines = toRead->nbLines;
-    for(int i = 0; i < toRead->nbLines; i++){
-        lineToWaterToFill->line[i] = toRead->line[i];
-    }
 }

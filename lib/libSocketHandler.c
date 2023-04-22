@@ -4,7 +4,7 @@
 #endif
 int socketFd;
 struct sockaddr_in server;
-extern int NB_HUMIDITY_SENSOR;
+extern int NB_HUMIDITY_SENSORS;
 
 int initSocket () {
     socketFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -61,7 +61,7 @@ int sendIndentificationFrame () {
         return -1;
     }
     memcpy(idFrame, macAddr, 6);
-    idFrame[6] = NB_HUMIDITY_SENSOR; //TODO get the number of humidity sensors 
+    idFrame[6] = NB_HUMIDITY_SENSORS; //TODO get the number of humidity sensors 
     if (sendToSocket(idFrame, ID_FRAME_LEN) == -1){
         perror("Error sending id Frame");
         return -1;

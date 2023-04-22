@@ -7,8 +7,12 @@
     #include "../include/libSharedMemory.h"
     #define LIBSHAREDMEMORY_H 1
 #endif
+#ifndef LIBSENSOR_
+    #include "../include/libSensorManager.h"
+#define LIBSENSOR_H 1
+#endif
 
-log logToWrite;
+log newLog;
 sem_t sensorSem;
 extern int idLogShm;
 
@@ -20,11 +24,15 @@ void initSensorManager () {
 }
 void sensorManager () {
     while(1){
+        alarm(10);
         sem_wait(&sensorSem);
-        //TODO take samples
-
-
-        writeLogShm(idLogShm,&logToWrite);
+        newLog.phLevel = 10*readPhValue();
+        printf("ph level : %d\n",newLog.phLevel);
+        newLog.waterLevel = 10*readWaterLevelValue();
+        printf("water level : %d\n",newLog.waterLevel);
+        newLog.temperature = 10*readTemperatureValue();
+        readHumidityValues(newLog.hSensorsValue);
+        writeLogShm(idLogShm,&newLog);
     }
 }
 
@@ -32,7 +40,6 @@ void sensorManagerSignalHandler(int signal, siginfo_t *info){
     switch(signal){
         case SIGALRM :
             sem_post(&sensorSem);
-            //TODO take samples
             break;
         default :
             break;  

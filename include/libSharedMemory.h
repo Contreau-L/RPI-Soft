@@ -12,9 +12,8 @@ int createlogSharedMemory();
 int createLineToWaterSharedMemory();
 
 void _fillLog(log *logToFill, log *logToRead);
-void _fillLineToWater(lineToWater *lineToWaterToFill, lineToWater *toRead);
 int writeLogShm(int sharedMemoryId, log *logToWrite);
-int writeLineToWaterShm(int sharedMemoryId, lineToWater *lineToWaterToWrite);
+int writeLineToWaterShm(int sharedMemoryId, uint8_t *lineToWaterToWrite);
 int readLogShm(int sharedMemoryId, log *logToRead);
-int readLineToWaterShm(int sharedMemoryId, lineToWater *lineToWaterToRead);
+int readLineToWaterShm(int sharedMemoryId, uint8_t *lineToWaterToRead);
 void eraseSharedMemory(int sharedMemoryId);
