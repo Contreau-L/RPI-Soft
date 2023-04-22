@@ -112,6 +112,7 @@ void readContreaulConf () {
     cJSON *coeff;
     cJSON *offset;
     cJSON *pin;
+    cJSON *id;
 
     cJSON *humiditySensor;
     cJSON *waterValve;
@@ -159,9 +160,9 @@ void readContreaulConf () {
     I2Caddress = cJSON_GetObjectItemCaseSensitive(phMeter, "I2Caddress");
     sscanf(I2Caddress->valuestring,"%hhx",&(sensorsPinConfig.phPin.I2CAddress));
     coeff = cJSON_GetObjectItemCaseSensitive(phMeter, "coeff");
-    sensorCalib.phCoeff = coeff->valuedouble;
+    sensorCalib.phCalibration.coeff = coeff->valuedouble;
     offset = cJSON_GetObjectItemCaseSensitive(phMeter, "offset");
-    sensorCalib.phOffset = offset->valuedouble;
+    sensorCalib.phCalibration.offset = offset->valuedouble;
 
 
     cJSON *pressureSensor = cJSON_GetObjectItemCaseSensitive(sensors, "pressureSensor");
@@ -170,9 +171,19 @@ void readContreaulConf () {
     I2Caddress = cJSON_GetObjectItemCaseSensitive(pressureSensor, "I2Caddress");
     sscanf(I2Caddress->valuestring,"%hhx",&(sensorsPinConfig.pressurePin.I2CAddress));
     coeff = cJSON_GetObjectItemCaseSensitive(pressureSensor, "coeff");
-    sensorCalib.pressureCoeff = coeff->valuedouble;
+    sensorCalib.pressureCalibration.coeff = coeff->valuedouble;
     offset = cJSON_GetObjectItemCaseSensitive(pressureSensor, "offset");
-    sensorCalib.pressureOffset = offset->valuedouble;
+    sensorCalib.pressureCalibration.offset = offset->valuedouble;
+
+
+    cJSON *tempSensor = cJSON_GetObjectItemCaseSensitive(sensors, "temperatureSensor");
+    id = cJSON_GetObjectItemCaseSensitive(tempSensor, "id");
+    strcpy(sensorsPinConfig.tempSensorId,id->valuestring);
+    coeff = cJSON_GetObjectItemCaseSensitive(tempSensor, "coeff");
+    sensorCalib.tempCalibration.coeff = coeff->valuedouble;
+    offset = cJSON_GetObjectItemCaseSensitive(tempSensor, "offset");
+    sensorCalib.tempCalibration.offset = offset->valuedouble;
+
 
     //actuators now
     actuators = cJSON_GetObjectItemCaseSensitive(json, "actuators");
@@ -190,17 +201,26 @@ void readContreaulConf () {
         i++;
     }
     //print everything
-    printf("NB_HUMIDITY_SENSORS: %d\n",NB_HUMIDITY_SENSORS);
-    for(int i = 0 ; i < NB_HUMIDITY_SENSORS ; i++){
-        printf("humiditySensor %d: I2Cpin: %d, I2Caddress: 0x%02x, MAX: %d\n",i,sensorsPinConfig.humidityPins[i].I2CPin,sensorsPinConfig.humidityPins[i].I2CAddress,sensorCalib.humidityCalibration[i]);
+    printf("NB_HUMIDITY_SENSORS : %d\n",NB_HUMIDITY_SENSORS);
+    printf("| TEMP SENSOR ID : %s | ",sensorsPinConfig.tempSensorId);
+    printf("| TEMP SENSOR COEFF : %f| ",sensorCalib.tempCalibration.coeff);
+    printf("| TEMP SENSOR OFFSET : %f| \n",sensorCalib.tempCalibration.offset);
+
+    printf("| PRESSURE SENSOR COEFF : %f| ",sensorCalib.pressureCalibration.coeff);
+    printf("| PRESSURE SENSOR OFFSET : %f| \n",sensorCalib.pressureCalibration.offset);
+
+    printf("| PH SENSOR COEFF : %f| ",sensorCalib.phCalibration.coeff);
+    printf("| PH SENSOR OFFSET : %f| \n",sensorCalib.phCalibration.offset);
+
+    for(int i = 0; i < NB_HUMIDITY_SENSORS; i++){
+        printf("| HUMIDITY SENSOR %d I2C PIN : %d| ",i,sensorsPinConfig.humidityPins[i].I2CPin);
+        printf("| HUMIDITY SENSOR %d I2C ADDRESS : %x| ",i,sensorsPinConfig.humidityPins[i].I2CAddress);
+        printf("| HUMIDITY SENSOR %d MAX : %d| \n",i,sensorCalib.humidityCalibration[i]);
+    }
+    printf("| PUMP PIN : %d| \n",actuatorsPinConfig.pumpPin);
+
+    for(int i = 0; i < NB_HUMIDITY_SENSORS; i++){
+        printf("| WATER VALVE %d PIN : %d| \n",i,actuatorsPinConfig.waterValvePins[i]);
     }
 
-    printf("phMeter: I2Cpin: %d, I2Caddress: 0x%02x, coeff: %f, offset: %f\n",sensorsPinConfig.phPin.I2CPin,sensorsPinConfig.phPin.I2CAddress,sensorCalib.phCoeff,sensorCalib.phOffset);
-
-    printf("pressureSensor: I2Cpin: %d, I2Caddress: 0x%02x, coeff: %f, offset: %f\n",sensorsPinConfig.pressurePin.I2CPin,sensorsPinConfig.pressurePin.I2CAddress,sensorCalib.pressureCoeff,sensorCalib.pressureOffset);
-
-    for(int i = 0; i < NB_HUMIDITY_SENSORS ; i++){
-        printf("waterValve %d: pin: %d\n",i,actuatorsPinConfig.waterValvePins[i]);
-    }
-    printf("pump: pin: %d\n",actuatorsPinConfig.pumpPin);
 }

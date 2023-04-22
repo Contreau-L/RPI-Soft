@@ -8,7 +8,8 @@
 
 #define SAMPLES 40
 
-#define PATH "/sys/bus/w1/devices/28-00000e6680a5/w1_slave"
+#define PRE_PATH "/sys/bus/w1/devices"
+#define POST_PATH "w1_slave"
 
 
 double avergearray(int* arr, int number);

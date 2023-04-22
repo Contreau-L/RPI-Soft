@@ -20,6 +20,11 @@
 #define CONF_FILE "contreaulConf.json"
 
 typedef struct {
+    float offset;
+    float coeff;
+} calibration;
+
+typedef struct {
     uint8_t I2CAddress;
     uint8_t I2CPin;
 } I2CAnalogSensorPin;
@@ -34,16 +39,16 @@ typedef struct {
 
 typedef struct {
     int humidityCalibration[255];
-    float phCoeff;
-    float phOffset;
-    float pressureCoeff;
-    float pressureOffset; 
+    calibration phCalibration;
+    calibration pressureCalibration;
+    calibration tempCalibration;
 } sensorCalibration;
 
 typedef struct{
     I2CAnalogSensorPin humidityPins[255];
     I2CAnalogSensorPin phPin;
     I2CAnalogSensorPin pressurePin;
+    char tempSensorId[100];
 } sensorsPinConfiguration;
 
 typedef struct {
