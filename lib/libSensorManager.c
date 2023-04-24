@@ -59,7 +59,7 @@ float readPhValue() {
 
     voltage = avergearray(pHArray, SAMPLES)*GAIN_ONE_VALUE/MAX_VALUE;
     pHValue = 3.5*voltage;
-    pHValue = sensorCalib.phCoeff*pHValue + sensorCalib.phOffset; //fonction affine, on a calibré avec un pH 7.0 et un pH 4.0
+    pHValue = sensorCalib.phCalibration.coeff*pHValue + sensorCalib.phCalibration.offset; //fonction affine, on a calibré avec un pH 7.0 et un pH 4.0
     printf("tension : %f / phValue: %f\n",voltage, pHValue);
     return pHValue;
 }
@@ -72,7 +72,7 @@ float readWaterLevelValue() {
     while(pressureSensorIndex<SAMPLES)
         pressureSensor[pressureSensorIndex++]=readADC_SingleEnded(sensorsPinConfig.pressurePin.I2CPin,GAIN_TWO);
     voltage = avergearray(pressureSensor, SAMPLES)*GAIN_TWO_VALUE/MAX_VALUE;
-    level = voltage * sensorCalib.pressureCoeff + sensorCalib.pressureOffset;
+    level = voltage * sensorCalib.pressureCalibration.coeff + sensorCalib.pressureCalibration.offset;
     printf("tension : %f / level: %f\n",voltage, level);
     return level;
 }
@@ -99,7 +99,9 @@ float readTemperatureValue() {
     char temp[10];
     float temperature;
     int fd = 0;
-    if ((fd = open(PATH, O_RDONLY)) < 0) 
+    char path[100];
+    sprintf(path, "%s/%s/%s",PRE_PATH,sensorsPinConfig.temperaturePin,POST_PATH);
+    if ((fd = open(path, O_RDONLY)) < 0) 
     {
         perror("Error when opening w1_slave");
         exit(1);
@@ -108,6 +110,7 @@ float readTemperatureValue() {
     len=read(fd, buffer, sizeof(buffer));
     strncpy(temp, buffer+len-6, 5);	
     temperature=atof(temp)/1000;
+    temperature = temperature * sensorCalib.tempCalibration.coeff + sensorCalib.tempCalibration.offset;
     close(fd);
     printf("Temp = %2.3f°C\n", temperature);
     return temperature;

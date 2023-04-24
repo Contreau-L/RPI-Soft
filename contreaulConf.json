@@ -1,5 +1,5 @@
 {
-    "NB_HUMIDITY_SENSOR":3,
+    "NB_HUMIDITY_SENSORS":3,
     "sensors":{
         "humiditySensors":[
             {
@@ -29,6 +29,11 @@
             "I2Caddress":"0x49",
             "coeff":3030.3,
             "offset":-1412.4
+        },
+        "temperatureSensor":{
+            "id":"28-00000e6680a5",
+            "coeff":1.0,
+            "offset" :0.0
         }
     },
     "actuators":{
