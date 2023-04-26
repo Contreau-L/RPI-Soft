@@ -22,6 +22,13 @@ int initSocket () {
         perror("Error connecting to server");
         return -1;
     }
+    struct timeval timeout;
+    timeout.tv_sec = 5; // 5 secondes
+    timeout.tv_usec = 0; // 0 microseconde
+    if (setsockopt(socketFd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0) {
+        perror("setsockopt");
+        return -1;
+    }
     return 0;
 
 }
@@ -95,4 +102,39 @@ int sendToSocket (char *msg, int len) {
 
 void closeSocket () {
     close(socketFd);
+}
+
+int readSocket(char **buffer, int *len) {
+    char buff[1024];
+    int bytesRead = recv(socketFd, buff, sizeof(buff) - 1, 0);
+    if (bytesRead < 0) {
+        perror("Error reading from socket");
+        return -1;
+    }
+    *buffer = malloc(bytesRead*sizeof(char));
+    memcpy(*buffer, buff, bytesRead);
+    *len = bytesRead;
+    return bytesRead;
+    
+}
+
+int goToNextFrame () {
+    char *buffer;
+    int len;
+    if(readSocket(&buffer, &len) > 0){
+        if(buffer[0] == ACK && len == 1) {
+            printf("ACK received\n");
+            return 1;
+        }
+        else {
+            printf("ACK not received\n");
+            return -1;
+        }
+    }
+    else {
+        printf("ACK not received\n");
+        return -1;
+    }
+
+
 }

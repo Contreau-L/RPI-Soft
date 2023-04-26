@@ -18,6 +18,7 @@
 
 #define LOG_FILE "contreaul.log"
 #define CONF_FILE "contreaulConf.json"
+#define TH_FILE "contreaulThresholds.json"
 
 typedef struct {
     float offset;

@@ -224,3 +224,43 @@ void readContreaulConf () {
     }
 
 }
+
+
+void registerThresholds(char *data) {
+    //todo register it in JSON
+    FILE *fp;
+    cJSON *jsonObj;
+    cJSON *thresholds;
+
+    jsonObj = cJSON_CreateObject();
+    if (jsonObj == NULL)
+        return; 
+    
+    thresholds = cJSON_CreateArray();
+    for(int i = 0 ; i < NB_HUMIDITY_SENSORS;i++) {
+        printf("%02x ",data[i]);
+        cJSON_AddItemToArray(thresholds,cJSON_CreateNumber(data[i]));
+    }
+    cJSON_AddItemToObject(jsonObj, "thresholds",thresholds);
+
+    char *string = cJSON_Print(jsonObj);
+    if (string == NULL)
+    {
+        perror("Failed to print monitor.\n");
+        return;
+    }
+    fp = fopen(TH_FILE,"w");
+    if (fp == NULL) {
+        perror("Error opening file");
+        return;
+    }
+    fprintf(fp,"");
+    fprintf(fp,"%s",string);
+    fclose(fp);
+    return;
+
+}
+
+// void readThresholds(uint8_t** thresholds) {
+
+// }

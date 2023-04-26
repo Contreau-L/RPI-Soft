@@ -43,11 +43,11 @@ int main() {
             break;
         case SENSOR_MANAGER:
             printf("I'm the sensor manager %d\n",getpid());
-            initSensorManager();
+            //initSensorManager();
             break;
         case ACTUATOR_MANAGER:
             printf("I'm the actuator manager %d\n",getpid());
-            initActuatorManager();
+           // initActuatorManager();
             break;
     }
     return 0;

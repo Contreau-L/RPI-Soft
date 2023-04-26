@@ -13,3 +13,4 @@ void writeLogToFile(log *logToWrite);
 void readLogFile(uint8_t **tabToFill,int *len);
 void readContreaulConf();
 void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value);
+void registerThresholds(char *data);

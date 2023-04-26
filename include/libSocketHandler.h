@@ -16,11 +16,11 @@
     #define CONTREAUL_H 1
 #endif
 
-#define IOT_PORT 5000
+#define IOT_PORT 5050
 #define IOT_URL "localhost"
 #define INTERFACE "wlp0s20f3" //to be changed for the raspberry
 #define ID_FRAME_LEN 7
-#define ACK 0xb5
+#define ACK 'a'
 int DNSResolution();
 int initSocket();
 int getMacAddr(char *macAddr);
@@ -28,3 +28,5 @@ int sendToSocket(char *msg, int len);
 int socketManager();
 int sendIndentificationFrame();
 void closeSocket();
+int readSocket(char **buffer, int *len);
+int goToNextFrame();

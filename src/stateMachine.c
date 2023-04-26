@@ -42,6 +42,8 @@ void initStateMachine(){
 
 
 void stateMachine() {
+    printf("state machine started\n");
+    sem_post(&networkSem);
     while(1){
         sem_wait(&stateMachineSem);
         switch(state){
@@ -74,21 +76,43 @@ void *networkManager(void *arg) {
     uint8_t *dataToSend;
     int len = 0;
     uint8_t end = 0xFF;
+    char *buffer;
+    int bufferLen;
+    char ack = ACK;
     while(1) {
         sem_wait(&networkSem);
+        printf("network manager started\n");
         readLogFile(&dataToSend, &len);
+        printf("data to send : %d\n",len);
         if(socketManager()){
-            for(int i = 0; i < len; i += 13+NB_HUMIDITY_SENSORS){
-                usleep(100000);
-                if(sendToSocket(&dataToSend[i], 13+NB_HUMIDITY_SENSORS)){
-                    printf("Data sent\n");
-                }
-                else{
-                    printf("Error while sending data\n");
-                    break;
+            if(goToNextFrame()){
+                for(int i = 0; i < len; i += 13+NB_HUMIDITY_SENSORS){
+                    if(sendToSocket(&dataToSend[i], 13+NB_HUMIDITY_SENSORS)){
+                        printf("Data sent\n");
+                    }
+                    else{
+                        printf("Error while sending data\n");
+                    }
+                    if(!goToNextFrame()){
+                        printf("Error in ACK !\n");
+                        break;
+                    }
                 }
             }
+            else{
+                printf("Error while sending the ID frame\n");
+            }
             sendToSocket(&end,1);
+            if(readSocket(&buffer, &bufferLen))
+                registerThresholds(buffer);
+            else{
+                printf("Error no data received");
+                closeSocket();
+            }
+            sendToSocket(&ack,1);
+            if(readSocket(&buffer, &bufferLen)){
+                //todo parse and launch actuators
+            }
             closeSocket();
 
         }
