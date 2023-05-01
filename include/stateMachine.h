@@ -14,7 +14,6 @@
 #endif
 #define READ_DATA  1
 #define WATERING 2
-#define END 0xFF
 
 void *networkManager(void *arg);
 void stateMachineSignalHandler(int signal, siginfo_t *info);

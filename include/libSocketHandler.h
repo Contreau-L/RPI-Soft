@@ -17,10 +17,12 @@
 #endif
 
 #define IOT_PORT 5050
-#define IOT_URL "localhost"
-#define INTERFACE "wlp0s20f3" //to be changed for the raspberry
+#define IOT_URL "192.168.1.123"
+#define INTERFACE "wlan0" //to be changed for the raspberry
 #define ID_FRAME_LEN 7
 #define ACK 'a'
+#define NOTHING 0xFF
+#define END 0xFF
 int DNSResolution();
 int initSocket();
 int getMacAddr(char *macAddr);

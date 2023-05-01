@@ -19,8 +19,8 @@ int stateMachinePid;
 void initSensorManager () { 
     initSignalHandler(sensorManagerSignalHandler,1,SIGUSR1);
     sem_init(&sensorSem,0,0);
-    sensorManager();
     stateMachinePid = getppid();
+    sensorManager();
 
 }
 void sensorManager () {
@@ -34,6 +34,7 @@ void sensorManager () {
         readHumidityValues(newLog.hSensorsValue);
         writeLogShm(idLogShm,&newLog);
         kill(stateMachinePid,SIGUSR1); //inform the stateMachine that we got a new measurement done
+        printf("sensor manager SENT THE SIGNAL TO : %d\n",stateMachinePid);
     }
 }
 

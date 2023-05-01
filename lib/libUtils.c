@@ -11,7 +11,7 @@ actuatorsPinConfiguration actuatorsPinConfig;
 void initSignalHandler(void (*handlerFunction)(int, siginfo_t*),int count, ...) {
     struct sigaction action;
     action.sa_sigaction = (void *)handlerFunction;
-    action.sa_flags = SA_SIGINFO;
+    action.sa_flags = SA_SIGINFO | SA_RESTART;
 
     sigemptyset(&action.sa_mask);
     sigprocmask(SIG_SETMASK, &action.sa_mask,NULL); 
@@ -68,6 +68,7 @@ void readLogFile(uint8_t **tabToFill,int *len){
         printf("Error opening file!\n");
         exit(1);
     }
+    *tabToFill = NULL;
     do{
 
         *tabToFill = realloc(*tabToFill, (*len+14+NB_HUMIDITY_SENSORS)*sizeof(uint8_t));

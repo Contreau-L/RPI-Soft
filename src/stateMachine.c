@@ -27,7 +27,7 @@ char *actions;
 void initStateMachine(){
     sem_init(&networkSem, 0, 0);
     sem_init(&stateMachineSem, 0, 0);
-    initSignalHandler(stateMachineSignalHandler,2,SIGUSR1,SIGALRM);
+    initSignalHandler(stateMachineSignalHandler,3,SIGUSR1,SIGALRM,SIGINT);
     pthread_create(&network, NULL, networkManager, NULL);
     stateMachine();
 }
@@ -35,7 +35,7 @@ void initStateMachine(){
 
 void stateMachine() {
     printf("state machine started\n");
-    sem_post(&networkSem);
+    alarm(10);
     while(1){
         sem_wait(&stateMachineSem);
         switch(state){
@@ -54,17 +54,21 @@ void stateMachine() {
                 alarm(10);
                 break;
             case WATERING :
+                printf("watering\n");
                 kill(pidSensorManager,SIGUSR1); 
                 sem_wait(&stateMachineSem); //wait for him to be done
                 readLogShm(idLogShm,sensorsLog); //read the log
                 if(checkLinesHumidity(sensorsLog,actions)){
-                    writeLineToWaterShm(idWaterShm,actions);
-                    kill(pidActuatorManager,SIGUSR1);
+                    state = WATERING;
                     alarm(5);
+
                 }
                 else{
                     state = READ_DATA;
+                    alarm(10);
                 }
+                writeLineToWaterShm(idWaterShm,actions);
+                kill(pidActuatorManager,SIGUSR1);
         }
     }
 }
@@ -108,6 +112,9 @@ void *networkManager(void *arg) {
                     if(mapActionsToLines(buffer,bufferLen,&actions)){
                         state = WATERING;
                     }
+                    else{
+                        state = READ_DATA;
+                    }
                 }
                 else{
                     printf("data received for the actions\n");
@@ -132,8 +139,12 @@ void stateMachineSignalHandler(int signal, siginfo_t *info){
             sem_post(&stateMachineSem);
             break;
         case SIGALRM :
-            //state = START_WATERING;
             sem_post(&stateMachineSem);
+            break;
+        case SIGINT :
+            kill(pidSensorManager,SIGKILL);
+            kill(pidActuatorManager,SIGKILL);
+            exit(0);
             break;
         default :
             break;  

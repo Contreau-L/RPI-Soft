@@ -42,7 +42,7 @@
         },
         "waterValves":[
             {
-                "pin":11
+                "pin":0
             },
             {
                 "pin":12

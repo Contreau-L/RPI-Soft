@@ -18,14 +18,16 @@ sem_t actuatorSem;
 uint8_t lines[255];
 
 void initActuatorManager(){ 
-    initSignalHandler(actuatorManagerSignalHandler,2,SIGUSR1);
+    initSignalHandler(actuatorManagerSignalHandler,1,SIGUSR1);
     sem_init(&actuatorSem,0,0);
+    setupToOutput();
     actuatorManager();
 
 }
 void actuatorManager(){
     while(1){
         sem_wait(&actuatorSem);
+        printf("actuator manager RECEIVED THE SIGNAL\n");
         readLineToWaterShm(idWaterShm,lines);
         watering(lines);
     }

@@ -2,6 +2,7 @@
     #include "../include/libStateMachine.h"
     #define LIBSTATEMACHINE_H 1
 #endif
+
 extern int NB_HUMIDITY_SENSORS;
 int checkLinesHumidity(log* log,uint8_t *actions){
     int i;
@@ -21,10 +22,12 @@ int checkLinesHumidity(log* log,uint8_t *actions){
 }
 
 int mapActionsToLines(char *data, int len,char **actions){
-    if(len == 0)
-        return 0;
     *actions = malloc(NB_HUMIDITY_SENSORS*sizeof(char));
     memset(*actions,0, NB_HUMIDITY_SENSORS);
+    if(len == 1 && data[0] == NOTHING){
+        printf("nothing to do\n");
+        return 0;
+    }
     for(int i = 0; i < len;i ++){
         (*actions)[data[i]] = 1;
     }
