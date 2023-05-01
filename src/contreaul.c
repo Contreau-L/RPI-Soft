@@ -12,10 +12,6 @@
     #include "../include/stateMachine.h"
     #define STATEMACHINE_H 1
 #endif
-#ifndef LIBSHAREDMEMORY_H
-    #include "../include/libSharedMemory.h"
-    #define LIBSHAREDMEMORY_H 1
-#endif
 #ifndef SENSORMANAGER_H
     #include "../include/sensorManager.h"
     #define SENSORMANAGER_H 1
@@ -43,11 +39,11 @@ int main() {
             break;
         case SENSOR_MANAGER:
             printf("I'm the sensor manager %d\n",getpid());
-            //initSensorManager();
+            initSensorManager();
             break;
         case ACTUATOR_MANAGER:
             printf("I'm the actuator manager %d\n",getpid());
-           // initActuatorManager();
+            initActuatorManager();
             break;
     }
     return 0;

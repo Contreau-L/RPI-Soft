@@ -5,5 +5,4 @@
 
 #include <wiringPi.h>
 
-void enableWatering(uint8_t *linesToWater);
-void stopWatering();
+void watering(uint8_t *lines);

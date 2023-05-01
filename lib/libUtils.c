@@ -261,6 +261,28 @@ void registerThresholds(char *data) {
 
 }
 
-// void readThresholds(uint8_t** thresholds) {
-
-// }
+void readThresholds(uint8_t **thresholdsValues) {
+    FILE *fp;
+    char buffer[1024];
+    fp = fopen(TH_FILE,"r");
+    if (fp == NULL) {
+        perror("Error opening file");
+        return;
+    }
+    fread(buffer,1024,1,fp);
+    fclose(fp);
+    cJSON *json = cJSON_Parse(buffer);
+    *thresholdsValues = malloc(sizeof(uint8_t)*NB_HUMIDITY_SENSORS);
+    cJSON *thresholds = cJSON_GetObjectItemCaseSensitive(json, "thresholds");
+    int i = 0;
+    cJSON *threshold;
+    cJSON_ArrayForEach(threshold, thresholds) {
+        (*thresholdsValues)[i] = threshold->valueint;
+        i++;
+    }
+    printf("THRESHOLDS : ");
+    for(int i = 0; i < NB_HUMIDITY_SENSORS; i++){
+        printf("%d ",(*thresholdsValues)[i]);
+    }
+    printf("\n");
+}

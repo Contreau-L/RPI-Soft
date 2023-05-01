@@ -1,22 +1,13 @@
-#include <pthread.h>
-#include <semaphore.h>
-#include <unistd.h>
-#ifndef LIBUTILS_H
-    #include "../include/libUtils.h"
-    #define LIBUTILS_H 1
-#endif
 #ifndef STATEMACHINE_H
     #include "../include/stateMachine.h"
     #define STATEMACHINE_H 1
 #endif
-#ifndef LIBSHAREDMEMORY_H
-    #include "../include/libSharedMemory.h"
-    #define LIBSHAREDMEMORY_H 1
+#ifndef LIBSTATEMACHINE_H
+    #include "../include/libStateMachine.h"
+    #define LIBSTATEMACHINE_H 1
 #endif
-#ifndef LIBSOCKETHANDLER_H
-    #include "../include/libSocketHandler.h"
-    #define LIBSOCKETHANDLER_H 1
-#endif
+
+
 
 extern int pidSensorManager;
 extern int pidActuatorManager;
@@ -28,17 +19,18 @@ sem_t networkSem;
 sem_t stateMachineSem;
 int measureCount = 0;
 int state = 0;
-log *logToFill;
+int needToWater = 0;
+log *sensorsLog;
+char *actions;
 
 
 void initStateMachine(){
     sem_init(&networkSem, 0, 0);
     sem_init(&stateMachineSem, 0, 0);
-    initSignalHandler(stateMachineSignalHandler,1,SIGUSR1);
+    initSignalHandler(stateMachineSignalHandler,2,SIGUSR1,SIGALRM);
     pthread_create(&network, NULL, networkManager, NULL);
     stateMachine();
 }
-
 
 
 void stateMachine() {
@@ -47,27 +39,32 @@ void stateMachine() {
     while(1){
         sem_wait(&stateMachineSem);
         switch(state){
-            case READ_DATA:
-                printf("time to read data\n");
-                readLogShm(idLogShm,logToFill);
-                writeLogToFile(logToFill);
+            case READ_DATA : 
+                kill(pidSensorManager,SIGUSR1); 
+                sem_wait(&stateMachineSem); //wait for him to be done
+                readLogShm(idLogShm,sensorsLog); //read the log
+                writeLogToFile(sensorsLog);
                 if(measureCount == 3){
-                    state = SEND_DATA;
                     measureCount = 0;
-                    sem_post(&stateMachineSem);
+                    sem_post(&networkSem);
+                }
+                else{
+                    measureCount++;
+                }
+                alarm(10);
+                break;
+            case WATERING :
+                kill(pidSensorManager,SIGUSR1); 
+                sem_wait(&stateMachineSem); //wait for him to be done
+                readLogShm(idLogShm,sensorsLog); //read the log
+                if(checkLinesHumidity(sensorsLog,actions)){
+                    writeLineToWaterShm(idWaterShm,actions);
+                    kill(pidActuatorManager,SIGUSR1);
+                    alarm(5);
                 }
                 else{
                     state = READ_DATA;
-                    measureCount++;
                 }
-                break;
-            case SEND_DATA:
-                printf("time to send data\n");
-                sem_post(&networkSem);
-                state = READ_DATA;
-                break;
-            default:
-                break;
         }
     }
 }
@@ -75,10 +72,10 @@ void stateMachine() {
 void *networkManager(void *arg) {
     uint8_t *dataToSend;
     int len = 0;
-    uint8_t end = 0xFF;
+    uint8_t end = END;
     char *buffer;
     int bufferLen;
-    char ack = ACK;
+    uint8_t ack = ACK;
     while(1) {
         sem_wait(&networkSem);
         printf("network manager started\n");
@@ -86,8 +83,8 @@ void *networkManager(void *arg) {
         printf("data to send : %d\n",len);
         if(socketManager()){
             if(goToNextFrame()){
-                for(int i = 0; i < len; i += 13+NB_HUMIDITY_SENSORS){
-                    if(sendToSocket(&dataToSend[i], 13+NB_HUMIDITY_SENSORS)){
+                for(int i = 0; i < len; i += CST_DATA_LEN+NB_HUMIDITY_SENSORS){
+                    if(sendToSocket(&dataToSend[i], CST_DATA_LEN+NB_HUMIDITY_SENSORS)){
                         printf("Data sent\n");
                     }
                     else{
@@ -98,23 +95,28 @@ void *networkManager(void *arg) {
                         break;
                     }
                 }
-            }
-            else{
-                printf("Error while sending the ID frame\n");
-            }
-            sendToSocket(&end,1);
-            if(readSocket(&buffer, &bufferLen))
-                registerThresholds(buffer);
-            else{
-                printf("Error no data received");
+                sendToSocket(&end,1);
+                if(readSocket(&buffer, &bufferLen)){
+                    registerThresholds(buffer);
+                }
+                else{
+                    printf("Error no data received");
+                    closeSocket();
+                }
+                sendToSocket(&ack,1);
+                if(readSocket(&buffer, &bufferLen)){
+                    if(mapActionsToLines(buffer,bufferLen,&actions)){
+                        state = WATERING;
+                    }
+                }
+                else{
+                    printf("data received for the actions\n");
+                }
                 closeSocket();
             }
-            sendToSocket(&ack,1);
-            if(readSocket(&buffer, &bufferLen)){
-                //todo parse and launch actuators
+            else{
+                printf("Error no ack for the ID frame\n");
             }
-            closeSocket();
-
         }
         else{
             printf("Error while connecting to server\n");
@@ -127,6 +129,10 @@ void *networkManager(void *arg) {
 void stateMachineSignalHandler(int signal, siginfo_t *info){
     switch(signal){
         case SIGUSR1 :
+            sem_post(&stateMachineSem);
+            break;
+        case SIGALRM :
+            //state = START_WATERING;
             sem_post(&stateMachineSem);
             break;
         default :
