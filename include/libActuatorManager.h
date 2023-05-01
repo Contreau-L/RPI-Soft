@@ -5,4 +5,4 @@
 
 #include <wiringPi.h>
 
-void watering(uint8_t *lines);
+int watering(uint8_t *lines);

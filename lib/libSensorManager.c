@@ -100,7 +100,7 @@ float readTemperatureValue() {
     float temperature;
     int fd = 0;
     char path[100];
-    sprintf(path, "%s/%s/%s",PRE_PATH,sensorsPinConfig.temperaturePin,POST_PATH);
+    sprintf(path, "%s/%s/%s",PRE_PATH,sensorsPinConfig.tempSensorId,POST_PATH);
     if ((fd = open(path, O_RDONLY)) < 0) 
     {
         perror("Error when opening w1_slave");

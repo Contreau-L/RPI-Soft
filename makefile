@@ -20,8 +20,8 @@ $(BIN_DIR)/lib%.so: $(OBJ_DIR)/lib%.o
 
 $(BIN_DIR)/contreaul: $(OBJ_DIR)/contreaul.o $(OBJ_DIR)/stateMachine.o $(OBJ_DIR)/sensorManager.o $(OBJ_DIR)/actuatorManager.o \
                      $(BIN_DIR)/libUtils.so $(BIN_DIR)/libSharedMemory.so $(BIN_DIR)/libSocketHandler.so $(BIN_DIR)/libSensorManager.so $(BIN_DIR)/libI2C.so \
-					 $(BIN_DIR)/libActuatorManager.so
-	gcc $^ -o $@ -L$(BIN_DIR) -lUtils -lSharedMemory -lSocketHandler -lpthread -lcjson -lSensorManager -lI2C -lwiringPi -lActuatorManager -Wl,-rpath,$(CURRENT_DIRECTORY)/$(BIN_DIR)
+					 $(BIN_DIR)/libActuatorManager.so $(BIN_DIR)/libStateMachine.so
+	gcc $^ -o $@ -L$(BIN_DIR) -lUtils -lSharedMemory -lSocketHandler -lpthread -lcjson -lSensorManager -lI2C -lwiringPi -lActuatorManager -lStateMachine -Wl,-rpath,$(CURRENT_DIRECTORY)/$(BIN_DIR)
 
 directory:
 	mkdir -p $(OBJ_DIR) $(BIN_DIR)
