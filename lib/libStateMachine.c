@@ -5,11 +5,10 @@
 
 extern int NB_HUMIDITY_SENSORS;
 int checkLinesHumidity(log* log,uint8_t *actions){
-    int i;
     int flag = 0;
     uint8_t *thresholds;
     readThresholds(&thresholds); 
-    for(i = 0; i < NB_HUMIDITY_SENSORS; i++){
+    for(int i = 0; i < NB_HUMIDITY_SENSORS; i++){
         if(log->hSensorsValue[i] < thresholds[i] && actions[i] == 1){ //todo replace 10 by thresholds
             actions[i] = 1;
             flag = 1;
@@ -17,6 +16,10 @@ int checkLinesHumidity(log* log,uint8_t *actions){
         else{
             actions[i] = 0;           
         }
+    }
+    if(log->waterLevel < 5){
+        printf("water level too low\n");
+        flag = -1;
     }
     return flag;
 }

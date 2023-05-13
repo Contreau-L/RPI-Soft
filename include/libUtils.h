@@ -15,3 +15,4 @@ void readContreaulConf();
 void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value);
 void registerThresholds(char *data);
 void readThresholds(uint8_t **thresholdsValues);
+int fillWateringStatusFrame(wateringResult wateringR,uint8_t *lines,uint8_t **frame);

@@ -22,7 +22,8 @@ int state = 0;
 int needToWater = 0;
 log *sensorsLog;
 char *actions;
-
+int wateringState = -1;
+wateringResult wateringR;
 
 void initStateMachine(){
     sem_init(&networkSem, 0, 0);
@@ -58,17 +59,20 @@ void stateMachine() {
                 kill(pidSensorManager,SIGUSR1); 
                 sem_wait(&stateMachineSem); //wait for him to be done
                 readLogShm(idLogShm,sensorsLog); //read the log
-                if(checkLinesHumidity(sensorsLog,actions)){
+                wateringState = checkLinesHumidity(sensorsLog,actions);
+                if(wateringState){
                     state = WATERING;
                     alarm(5);
-
                 }
                 else{
+                    wateringR.wateringStatus = wateringState == -1 ? 0 : 1;
+                    wateringR.timeStamp = time(NULL);
                     state = READ_DATA;
                     alarm(10);
                 }
                 writeLineToWaterShm(idWaterShm,actions);
                 kill(pidActuatorManager,SIGUSR1);
+                break;
         }
     }
 }
@@ -83,10 +87,25 @@ void *networkManager(void *arg) {
     while(1) {
         sem_wait(&networkSem);
         printf("network manager started\n");
-        readLogFile(&dataToSend, &len);
         printf("data to send : %d\n",len);
         if(socketManager()){
             if(goToNextFrame()){
+                if(wateringState != -1){
+                    int len = fillWateringStatusFrame(wateringR,actions,&dataToSend);
+                    if(sendToSocket(buffer, len)){
+                        printf("Watering status sent\n");
+                    }
+                    else{
+                        printf("Error while sending watering status\n");
+                    }
+                    if(!goToNextFrame()){
+                        printf("Error in ACK !\n");
+                        closeSocket();
+                        break;
+                    }
+                    free(dataToSend);
+                }
+                readLogFile(&dataToSend, &len);
                 for(int i = 0; i < len; i += CST_DATA_LEN+NB_HUMIDITY_SENSORS){
                     if(sendToSocket(&dataToSend[i], CST_DATA_LEN+NB_HUMIDITY_SENSORS)){
                         printf("Data sent\n");

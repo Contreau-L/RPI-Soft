@@ -94,6 +94,30 @@ void readLogFile(uint8_t **tabToFill,int *len){
     fclose(file);
 }
 
+int fillWateringStatusFrame(wateringResult wateringR,uint8_t *lines,uint8_t **frame) {
+    int offset = 0;
+    int i = 0;
+    *frame = malloc((NB_HUMIDITY_SENSORS+15)*sizeof(uint8_t));
+    (*frame)[offset++] = 0x01;
+    (*frame)[offset++] = NB_HUMIDITY_SENSORS;
+
+    struct tm tm = *localtime(&wateringR.timeStamp);
+    _put2Bytes(frame,offset,tm.tm_mday);
+    _put2Bytes(frame,offset,tm.tm_mon + 1);
+    _put2Bytes(frame,offset,tm.tm_year+1900);
+    _put2Bytes(frame,offset,tm.tm_hour);
+    _put2Bytes(frame,offset,tm.tm_min);
+    memset(*(frame+offset),1,NB_HUMIDITY_SENSORS); //by default all sensors are watered
+    if(wateringR.wateringStatus == 0){
+        for(i = 0 ; i < NB_HUMIDITY_SENSORS ; i++){
+            if(lines[i] == 1){
+                (*frame)[i+offset] = 0; // set to false
+            }
+        }
+    }
+    return i+offset;
+}
+
 void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value){
     (*tabToFill)[*len] = value >> 8;
     (*tabToFill)[*len+1] = value & 0xFF;
@@ -191,7 +215,7 @@ void readContreaulConf () {
 
     cJSON *pump = cJSON_GetObjectItemCaseSensitive(actuators, "pump");
     pin = cJSON_GetObjectItemCaseSensitive(pump, "pin");
-    actuatorsPinConfig.pumpPin = I2Cpin->valueint;
+    actuatorsPinConfig.pumpPin = pin->valueint;
 
     //for each for water valves
     cJSON *waterValves = cJSON_GetObjectItemCaseSensitive(actuators, "waterValves");

@@ -41,6 +41,8 @@ void setupToOutput(){
     }
     for(int i = 0; i < NB_HUMIDITY_SENSORS; i++){
         pinMode(actuatorsPinConfig.waterValvePins[i], OUTPUT);
+        digitalWrite(actuatorsPinConfig.waterValvePins[i], LOW);
     }
     pinMode(actuatorsPinConfig.pumpPin, OUTPUT);
+    digitalWrite(actuatorsPinConfig.pumpPin, LOW);
 }

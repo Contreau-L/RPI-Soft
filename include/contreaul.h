@@ -57,3 +57,9 @@ typedef struct {
     uint8_t pumpPin;
     uint8_t waterValvePins[255];
 } actuatorsPinConfiguration;
+
+
+typedef struct {
+    uint8_t wateringStatus;
+    time_t timeStamp;
+} wateringResult;
