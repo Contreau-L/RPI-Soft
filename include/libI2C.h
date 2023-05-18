@@ -90,5 +90,5 @@ CONFIG REGISTER
 #define MAX_VALUE 32768
 uint16_t readRegister(uint8_t i2cFd, uint8_t i2cAddress, uint8_t reg);
 void writeRegister(uint8_t i2cFd, uint8_t i2cAddress, uint8_t reg, uint16_t value);
-uint16_t readADC_SingleEnded(uint8_t channel, int gain);
+uint16_t readADC_SingleEnded(uint8_t channel,int gain,uint8_t address);
 int setupI2C(uint8_t i2cAddress);

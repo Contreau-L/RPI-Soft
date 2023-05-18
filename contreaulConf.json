@@ -5,17 +5,17 @@
             {
                 "I2Cpin":0,
                 "I2Caddress":"0x48",
-                "MAX":16950
+                "MAX":16800
             },
             {
                 "I2Cpin":1,
                 "I2Caddress":"0x48",
-                "MAX":13400
+                "MAX":16100
             },
             {
                 "I2Cpin":2,
                 "I2Caddress":"0x48",
-                "MAX":13400
+                "MAX":16000
             }
         ],
         "phMeter":{
@@ -27,8 +27,8 @@
         "pressureSensor":{
             "I2Cpin":0,
             "I2Caddress":"0x49",
-            "coeff":3030.3,
-            "offset":-1412.4
+            "coeff":2659.6,
+            "offset":-1350
         },
         "temperatureSensor":{
             "id":"28-00000e6680a5",
@@ -38,17 +38,17 @@
     },
     "actuators":{
         "pump":{
-            "pin":10
+            "pin":1
         },
         "waterValves":[
             {
                 "pin":0
             },
             {
-                "pin":12
+                "pin":2
             },
             {
-                "pin":13
+                "pin":3
             }
         ]
     }

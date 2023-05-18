@@ -17,7 +17,7 @@
 #endif
 
 #define IOT_PORT 5050
-#define IOT_URL "192.168.1.123"
+#define IOT_URL "192.168.153.157"
 #define INTERFACE "wlan0" //to be changed for the raspberry
 #define ID_FRAME_LEN 7
 #define ACK 'a'

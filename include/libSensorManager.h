@@ -12,7 +12,7 @@
 #define POST_PATH "w1_slave"
 
 
-double avergearray(int* arr, int number);
+double avergearray(int16_t* arr, int number);
 float readPhValue();
 float readWaterLevelValue();
 float readTemperatureValue();

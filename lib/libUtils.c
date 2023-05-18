@@ -92,6 +92,7 @@ void readLogFile(uint8_t **tabToFill,int *len){
 
     }while(!feof(file));
     fclose(file);
+    remove(LOG_FILE);
 }
 
 int fillWateringStatusFrame(wateringResult wateringR,uint8_t *lines,uint8_t **frame) {
@@ -102,12 +103,14 @@ int fillWateringStatusFrame(wateringResult wateringR,uint8_t *lines,uint8_t **fr
     (*frame)[offset++] = NB_HUMIDITY_SENSORS;
 
     struct tm tm = *localtime(&wateringR.timeStamp);
-    _put2Bytes(frame,offset,tm.tm_mday);
-    _put2Bytes(frame,offset,tm.tm_mon + 1);
-    _put2Bytes(frame,offset,tm.tm_year+1900);
-    _put2Bytes(frame,offset,tm.tm_hour);
-    _put2Bytes(frame,offset,tm.tm_min);
-    memset(*(frame+offset),1,NB_HUMIDITY_SENSORS); //by default all sensors are watered
+    //print the date 
+    printf("Date : %d/%d/%d-%d:%d\n",tm.tm_mday, tm.tm_mon + 1, tm.tm_year+1900, tm.tm_hour, tm.tm_min);
+    (*frame)[offset++] = tm.tm_mday;
+    (*frame)[offset++] = tm.tm_mon + 1;
+    _put2Bytes(frame,&offset,tm.tm_year+1900);
+    (*frame)[offset++] = tm.tm_hour;
+    (*frame)[offset++] = tm.tm_min;
+    memset(&((*frame)[offset]),1,NB_HUMIDITY_SENSORS*sizeof(uint8_t));
     if(wateringR.wateringStatus == 0){
         for(i = 0 ; i < NB_HUMIDITY_SENSORS ; i++){
             if(lines[i] == 1){
@@ -115,7 +118,7 @@ int fillWateringStatusFrame(wateringResult wateringR,uint8_t *lines,uint8_t **fr
             }
         }
     }
-    return i+offset;
+    return offset+NB_HUMIDITY_SENSORS;
 }
 
 void _put2Bytes(uint8_t **tabToFill,int *len,uint16_t value){

@@ -51,7 +51,6 @@ int writeLineToWaterShm(int sharedMemoryId, uint8_t *lineToWaterToWrite){
 
 int readLogShm(int sharedMemoryId, log *logToFill){
     log *sharedMemory = (log*)shmat(sharedMemoryId, NULL, 0);
-
     if(sharedMemory == (log*)-1){
         perror("Error in attaching shared memory");
         return -1;

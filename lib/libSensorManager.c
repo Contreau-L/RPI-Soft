@@ -8,7 +8,7 @@ extern int NB_HUMIDITY_SENSORS;
 extern sensorCalibration sensorCalib;
 extern sensorsPinConfiguration sensorsPinConfig;
 
-double avergearray(int* arr, int number){
+double avergearray(int16_t* arr, int number){
   int i;
   int max,min;
   double avg;
@@ -50,12 +50,12 @@ double avergearray(int* arr, int number){
 
 
 float readPhValue() {
-    int pHArray[SAMPLES];
+    int16_t pHArray[SAMPLES];
     int pHArrayIndex=0;
     float voltage,pHValue;
     setupI2C(sensorsPinConfig.phPin.I2CAddress);
     while(pHArrayIndex<SAMPLES)
-        pHArray[pHArrayIndex++]=readADC_SingleEnded(sensorsPinConfig.phPin.I2CPin,GAIN_ONE);
+        pHArray[pHArrayIndex++]=readADC_SingleEnded(sensorsPinConfig.phPin.I2CPin,GAIN_ONE,sensorsPinConfig.phPin.I2CAddress);
 
     voltage = avergearray(pHArray, SAMPLES)*GAIN_ONE_VALUE/MAX_VALUE;
     pHValue = 3.5*voltage;
@@ -65,12 +65,12 @@ float readPhValue() {
 }
 
 float readWaterLevelValue() {
-    int pressureSensor[SAMPLES];
+    int16_t pressureSensor[SAMPLES];
     int pressureSensorIndex=0;
     float voltage,level;
     setupI2C(sensorsPinConfig.pressurePin.I2CAddress);
     while(pressureSensorIndex<SAMPLES)
-        pressureSensor[pressureSensorIndex++]=readADC_SingleEnded(sensorsPinConfig.pressurePin.I2CPin,GAIN_TWO);
+        pressureSensor[pressureSensorIndex++]=readADC_SingleEnded(sensorsPinConfig.pressurePin.I2CPin,GAIN_TWO,sensorsPinConfig.pressurePin.I2CAddress);
     voltage = avergearray(pressureSensor, SAMPLES)*GAIN_TWO_VALUE/MAX_VALUE;
     level = voltage * sensorCalib.pressureCalibration.coeff + sensorCalib.pressureCalibration.offset;
     printf("tension : %f / level: %f\n",voltage, level);
@@ -81,13 +81,16 @@ float readWaterLevelValue() {
 void readHumidityValues(uint8_t* humiditySensors) {
     int humiditySensorIndex=0;
     double humidity = 0;
-    int samplesHumiditySensor[SAMPLES];
+    int16_t samplesHumiditySensor[SAMPLES];
     for(int i = 0 ; i < NB_HUMIDITY_SENSORS;i++){
         setupI2C(sensorsPinConfig.humidityPins[i].I2CAddress);
         while(humiditySensorIndex<SAMPLES)
-            samplesHumiditySensor[humiditySensorIndex++]=readADC_SingleEnded(sensorsPinConfig.humidityPins[i].I2CPin,GAIN_ONE);
+            samplesHumiditySensor[humiditySensorIndex++]=readADC_SingleEnded(sensorsPinConfig.humidityPins[i].I2CPin,GAIN_ONE,sensorsPinConfig.humidityPins[i].I2CAddress);
         humidity = avergearray(samplesHumiditySensor, SAMPLES);
         humiditySensors[i] = humidity/sensorCalib.humidityCalibration[i] * 100; //trasnformation in percentage
+        if(humiditySensors[i] < 0){
+            humiditySensors[i] = 0;
+        }
         humiditySensorIndex = 0;
         printf("humidity sensor %d : %d\n",i, humiditySensors[i]);
     }

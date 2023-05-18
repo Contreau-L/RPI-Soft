@@ -8,3 +8,4 @@
 #endif
 int checkLinesHumidity(log* log,uint8_t *actions);
 int mapActionsToLines(char *data, int len,char **actions);
+void copyExecutedAction(char **actionsToFill,char* actionsToRead );

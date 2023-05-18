@@ -7,3 +7,4 @@
 
 int watering(uint8_t *lines);
 void setupToOutput();
+void setToLow();

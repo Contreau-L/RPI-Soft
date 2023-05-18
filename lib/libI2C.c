@@ -23,7 +23,7 @@ uint16_t readRegister(uint8_t i2cFd, uint8_t i2cAddress, uint8_t reg) {
 void writeRegister(uint8_t i2cFd, uint8_t i2cAddress, uint8_t reg, uint16_t value) {
   wiringPiI2CWriteReg16(i2cFd, reg, (value>>8) | (value<<8));
 }
-uint16_t readADC_SingleEnded(uint8_t channel,int gain){
+uint16_t readADC_SingleEnded(uint8_t channel,int gain,uint8_t address){
       if (channel > 3)
   {
     return 0;
@@ -62,12 +62,12 @@ uint16_t readADC_SingleEnded(uint8_t channel,int gain){
   config |= ADS1015_REG_CONFIG_OS_SINGLE;
 
   // Write config register to the ADC
-  writeRegister(fd, ADS1115_ADDRESS, ADS1015_REG_POINTER_CONFIG, config);
+  writeRegister(fd, address, ADS1015_REG_POINTER_CONFIG, config);
 
   // Wait for the conversion to complete
   usleep(1000*ADS1115_CONVERSIONDELAY);
 
   // Read the conversion results
   // Shift 12-bit results right 4 bits for the ADS1015
-  return readRegister(fd, ADS1115_ADDRESS, ADS1015_REG_POINTER_CONVERT) ;  
+  return readRegister(fd,address,ADS1015_REG_POINTER_CONVERT) ;  
 } 
