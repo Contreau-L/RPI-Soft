@@ -42,6 +42,12 @@ int mapActionsToLines(char *data, int len, char **actions)
     {
         (*actions)[data[i] - 1] = 1;
     }
+    printf("actions: ");
+    for (int i = 0; i < NB_HUMIDITY_SENSORS; i++)
+    {
+        printf("%d ", (*actions)[i]);
+    }
+    printf("\n");
     return 1;
 }
 

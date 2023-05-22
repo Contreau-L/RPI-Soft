@@ -69,7 +69,7 @@ void stateMachine()
             alarm(1);
             break;
         case WATERING:
-            printf("watering\n");
+            printf("watering MOD NOW\n");
             kill(pidSensorManager, SIGUSR1);
             sem_wait(&stateMachineSem);        // wait for him to be done
             readLogShm(idLogShm, &sensorsLog); // read the log
