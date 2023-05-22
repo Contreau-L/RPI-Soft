@@ -11,14 +11,14 @@
 #include <sys/ioctl.h>
 #include <net/if.h>
 
-#ifndef CONTREAUL_H 
-    #include "contreaul.h"
-    #define CONTREAUL_H 1
+#ifndef CONTREAUL_H
+#include "contreaul.h"
+#define CONTREAUL_H 1
 #endif
 
-#define IOT_PORT 5050
-#define IOT_URL "192.168.153.157"
-#define INTERFACE "wlan0" //to be changed for the raspberry
+#define IOT_PORT 5000
+#define IOT_URL "mariusc.best"
+#define INTERFACE "wlan0" // to be changed for the raspberry
 #define ID_FRAME_LEN 7
 #define ACK 'a'
 #define NOTHING 0xFF

@@ -50,7 +50,7 @@ void writeLogToFile(log *logToWrite)
     FILE *file = fopen(LOG_FILE, "a");
     if (file == NULL)
     {
-        printf("Error opening file!\n");
+        perror("Error opening file!\n");
         exit(1);
     }
     fprintf(file, "%d,", NB_HUMIDITY_SENSORS);
@@ -74,7 +74,7 @@ void readLogFile(uint8_t **tabToFill, int *len)
     uint8_t nbLinesInLog;
     if (file == NULL)
     {
-        printf("Error opening file!\n");
+        perror("Error opening file!\n");
         exit(1);
     }
     *tabToFill = NULL;
@@ -101,6 +101,13 @@ void readLogFile(uint8_t **tabToFill, int *len)
         _put2Bytes(tabToFill, len, read2Bytes);
         fscanf(file, "%hhu:%hhu", &((*tabToFill)[(*len)++]), &((*tabToFill)[(*len)++])); // hour and minute
         fscanf(file, "\n");
+
+        // print
+        for (int i = 0; i < *len; i++)
+        {
+            printf("%d ", (*tabToFill)[i]);
+        }
+        printf("\n");
 
     } while (!feof(file));
     fclose(file);

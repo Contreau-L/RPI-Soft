@@ -15,6 +15,9 @@
 #define READ_DATA  1
 #define WATERING 2
 
+#define REFRESH_RATE 2
+#define WATERING_REFRESH_RATE 5
+
 void *networkManager(void *arg);
 void stateMachineSignalHandler(int signal, siginfo_t *info);
 void initStateMachine();

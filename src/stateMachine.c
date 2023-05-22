@@ -66,7 +66,7 @@ void stateMachine()
                 state = WATERING;
                 networkErrorCount = 0;
             }
-            alarm(1);
+            alarm(REFRESH_RATE);
             break;
         case WATERING:
             printf("watering MOD NOW\n");
@@ -77,7 +77,7 @@ void stateMachine()
             if (wateringState == 1)
             {
                 state = WATERING;
-                alarm(5);
+                alarm(WATERING_REFRESH_RATE);
             }
             else
             {
@@ -90,7 +90,7 @@ void stateMachine()
                 }
                 wateringR.timeStamp = time(NULL);
                 state = READ_DATA;
-                alarm(2);
+                alarm(REFRESH_RATE);
             }
             writeLineToWaterShm(idWaterShm, actionsToExecute);
             kill(pidActuatorManager, SIGUSR1);

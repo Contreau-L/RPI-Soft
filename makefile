@@ -1,5 +1,3 @@
-
-
 OBJ_DIR=objectFiles
 INC_DIR=include
 SRC_DIR=src
